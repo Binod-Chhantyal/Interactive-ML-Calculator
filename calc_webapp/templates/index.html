@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Calculator Web Dashboard</title>
+<style>
+  /* Reset some default */
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f5f7fa;
+    color: #333;
+    max-width: 600px;
+    margin: 40px auto;
+    padding: 20px 30px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  }
+
+  h1 {
+    text-align: center;
+    color: #2c3e50;
+    margin-bottom: 20px;
+  }
+
+  p {
+    font-size: 0.9rem;
+    color: #555;
+    margin: 5px 0 15px;
+  }
+
+  input[type="text"] {
+    width: 100%;
+    padding: 14px 18px;
+    font-size: 1.1rem;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    transition: border-color 0.3s ease;
+  }
+
+  input[type="text"]:focus {
+    outline: none;
+    border-color: #2980b9;
+    box-shadow: 0 0 8px rgba(41, 128, 185, 0.5);
+  }
+
+  .button-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 15px;
+  }
+
+  button {
+    flex: 1 1 48%;
+    padding: 14px 0;
+    font-size: 1rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    background: #2980b9;
+    color: white;
+    transition: background-color 0.3s ease;
+  }
+
+  button:hover {
+    background: #1c5980;
+  }
+
+  #result, #plot {
+    margin-top: 25px;
+    padding: 15px;
+    border-radius: 8px;
+    background: white;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    min-height: 50px;
+    font-size: 1.1rem;
+    text-align: center;
+  }
+
+  #plot img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+  }
+
+  @media (max-width: 400px) {
+    button {
+      flex: 1 1 100%;
+    }
+  }
+</style>
+</head>
+<body>
+  <h1>Calculator with Histogram and Regression</h1>
+  <p>Enter two numbers separated by space (e.g. <code>3 4</code>) for add, subtract, multiply, divide.</p>
+  <p>Enter pairs as <code>x,y</code> separated by space (e.g. <code>1,2 3,4 5,6</code>) for histogram and regression.</p>
+
+  <input type="text" id="inputField" placeholder="Enter numbers or pairs here" />
+
+  <div class="button-group">
+    <button onclick="sendOperation('add')">Add</button>
+    <button onclick="sendOperation('subtract')">Subtract</button>
+    <button onclick="sendOperation('multiply')">Multiply</button>
+    <button onclick="sendOperation('divide')">Divide</button>
+    <button onclick="sendOperation('histogram')">Plot Histogram</button>
+    <button onclick="sendOperation('linear_regression')">Linear Regression</button>
+  </div>
+
+  <div id="result"></div>
+  <div id="plot"></div>
+
+<script>
+async function sendOperation(operation) {
+    const input = document.getElementById('inputField').value;
+    const response = await fetch('/calculate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ operation: operation, input: input })
+    });
+
+    const data = await response.json();
+
+    const resultDiv = document.getElementById('result');
+    const plotDiv = document.getElementById('plot');
+    plotDiv.innerHTML = '';
+    if (response.ok) {
+        if (data.result !== undefined) {
+            resultDiv.textContent = 'Result: ' + data.result;
+        } else if (data.plot_url) {
+            resultDiv.textContent = '';
+            const img = document.createElement('img');
+            img.src = 'data:image/png;base64,' + data.plot_url;
+            plotDiv.appendChild(img);
+
+            if (operation === 'linear_regression') {
+                resultDiv.textContent = `Slope: ${data.slope.toFixed(3)}, Intercept: ${data.intercept.toFixed(3)}`;
+            }
+        }
+    } else {
+        resultDiv.textContent = 'Error: ' + data.error;
+    }
+}
+</script>
+</body>
+</html>
