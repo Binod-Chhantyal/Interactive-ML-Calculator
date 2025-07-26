@@ -6,6 +6,7 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import io
 import base64
+import os
 
 app = Flask(__name__)
 
@@ -114,4 +115,5 @@ def calculate():
         return jsonify({'error': 'Invalid operation'}), 400
 
 if __name__ == '__main__':
-    app.run(debug=True, port = 5001)
+    port = int(os.environ.get('PORT', 10000))  # Render sets PORT env variable
+    app.run(host='0.0.0.0', port=port, debug=True)
