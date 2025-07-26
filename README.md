@@ -12,3 +12,5 @@ An interactive web-based calculator that supports basic arithmetic operations an
 - **User-friendly UI:** Clear input prompts with validation and helpful error messages.
 
 ---
+## Live Demo
+- https://interactive-ml-calculator.onrender.com/
